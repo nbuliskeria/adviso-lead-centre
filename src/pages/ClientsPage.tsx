@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, Users, Filter } from 'lucide-react';
-// import { useClients } from '../hooks/queries'; // TODO: Uncomment when database is ready
+import { useClients } from '../hooks/queries';
 import { CLIENT_STATUS_OPTIONS, SUBSCRIPTION_PACKAGE_OPTIONS } from '../lib/constants';
 import { Button } from '../components/ui/Button';
 import { SearchInput } from '../components/ui/SearchInput';
@@ -14,13 +14,8 @@ function ClientsPage() {
   const location = useLocation();
   const { addToast } = useToast();
   
-  // TODO: Uncomment when database tables are created
-  // const { data: clients = [], isLoading, error } = useClients();
-  
-  // Mock data for development
-  const clients: any[] = [];
-  const isLoading = false;
-  const error = null;
+  // Real data from database
+  const { data: clients = [], isLoading, error } = useClients();
 
   // Local state for UI controls
   const [searchTerm, setSearchTerm] = useState('');

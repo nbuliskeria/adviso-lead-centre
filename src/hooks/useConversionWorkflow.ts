@@ -1,7 +1,8 @@
 // src/hooks/useConversionWorkflow.ts
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from './useToast';
-// import { useConvertLeadToClient } from './queries';
+import { useConvertLeadToClient } from './queries';
 import type { ConversionFormData } from '../lib/schemas';
 import type { Database } from '../lib/database.types';
 
@@ -11,9 +12,9 @@ export const useConversionWorkflow = () => {
   const [isConversionModalOpen, setIsConversionModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
   const { addToast } = useToast();
+  const navigate = useNavigate();
   
-  // TODO: Uncomment when database tables are created
-  // const { mutate: convertLead, isPending: isConverting } = useConvertLeadToClient();
+  const { mutate: convertLead, isPending: isConverting } = useConvertLeadToClient();
 
   const openConversionModal = (lead: LeadRow) => {
     // Check if lead can be converted
@@ -32,14 +33,12 @@ export const useConversionWorkflow = () => {
 
   const handleConversion = async (leadId: string, conversionDetails: ConversionFormData) => {
     try {
-      // TODO: Uncomment when database tables are created
-      // await convertLead({ leadId, conversionDetails });
-      
-      // For now, just show a success message
-      console.log('Converting lead:', { leadId, conversionDetails });
-      addToast('Lead conversion initiated successfully!', 'success');
-      
+      await convertLead({ leadId, conversionDetails });
+      addToast('Lead converted to client successfully!', 'success');
       closeConversionModal();
+      
+      // Navigate to client space after successful conversion
+      navigate('/client-space');
     } catch (error) {
       console.error('Conversion failed:', error);
       addToast('Failed to convert lead. Please try again.', 'error');
@@ -53,6 +52,6 @@ export const useConversionWorkflow = () => {
     openConversionModal,
     closeConversionModal,
     handleConversion,
-    isConverting: false, // TODO: Replace with actual loading state
+    isConverting
   };
 };

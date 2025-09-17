@@ -2,14 +2,12 @@
 -- Created: 2025-09-17
 -- Description: Adds onboarding information fields for client setup process
 
--- Add onboarding columns to clients table
+-- Add onboarding columns to clients table (onboarding_completed fields already exist)
 ALTER TABLE public.clients
 ADD COLUMN rs_username TEXT,
 ADD COLUMN rs_password TEXT, -- Security Warning: For production, use Supabase Vault
 ADD COLUMN user_emails JSONB DEFAULT '[]'::jsonb,
-ADD COLUMN bank_details JSONB DEFAULT '[]'::jsonb,
-ADD COLUMN onboarding_completed BOOLEAN DEFAULT false,
-ADD COLUMN onboarding_completed_at TIMESTAMP WITH TIME ZONE;
+ADD COLUMN bank_details JSONB DEFAULT '[]'::jsonb;
 
 -- Add comments for documentation
 COMMENT ON COLUMN public.clients.rs_username IS 'RS.GE username for government integration';

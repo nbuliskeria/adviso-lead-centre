@@ -48,3 +48,28 @@ export const conversionSchema = z.object({
 });
 
 export type ConversionFormData = z.infer<typeof conversionSchema>;
+
+// Task Schema
+const subtaskSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, 'Subtask title is required'),
+  completed: z.boolean().default(false),
+  created_at: z.string().optional(),
+});
+
+export const taskSchema = z.object({
+  title: z.string().min(1, 'Task title is required'),
+  description: z.string().optional(),
+  status: z.enum(['To Do', 'In Progress', 'Done']).default('To Do'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  category: z.enum(['General', 'Follow-up', 'Onboarding', 'Support', 'Meeting', 'Documentation', 'Technical', 'Review']).optional(),
+  due_date: z.string().optional(),
+  estimated_hours: z.number().min(0).optional(),
+  lead_id: z.string().optional(),
+  client_id: z.string().optional(),
+  subtasks: z.array(subtaskSchema).default([]),
+  notes: z.string().optional(),
+});
+
+export type TaskFormData = z.infer<typeof taskSchema>;
+export type SubtaskData = z.infer<typeof subtaskSchema>;

@@ -1,6 +1,7 @@
 // src/hooks/queries/useTasks.ts
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabaseClient';
+import { useAuth } from '../useAuth';
 import { QUERY_KEYS } from '../../lib/constants';
 import type { Database } from '../../lib/database.types';
 
@@ -17,9 +18,13 @@ type TaskWithRelations = Task & {
     id: string;
     company_name: string;
   } | null;
+  client?: {
+    id: string;
+    company_name: string;
+  } | null;
 };
 
-const fetchTasks = async (): Promise<TaskWithRelations[]> => {
+const fetchTasks = async (userId: string): Promise<TaskWithRelations[]> => {
   const { data, error } = await supabase
     .from('client_tasks')
     .select(`
@@ -36,6 +41,7 @@ const fetchTasks = async (): Promise<TaskWithRelations[]> => {
         company_name
       )
     `)
+    .eq('assignee_id', userId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -47,9 +53,11 @@ const fetchTasks = async (): Promise<TaskWithRelations[]> => {
 };
 
 export const useTasks = () => {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: QUERY_KEYS.TASKS,
-    queryFn: fetchTasks,
+    queryKey: [...QUERY_KEYS.TASKS, user?.id],
+    queryFn: () => fetchTasks(user!.id),
+    enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
