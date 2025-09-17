@@ -35,3 +35,16 @@ export const leadSchema = z.object({
 });
 
 export type LeadFormData = z.infer<typeof leadSchema>;
+
+// Lead to Client Conversion Schema
+export const conversionSchema = z.object({
+  accountManagerId: z.string().min(1, 'Account manager is required'),
+  businessIdNumber: z.string().optional(),
+  subscriptionPackage: z.string().optional(),
+  monthlyValue: z.number().min(0, 'Monthly value must be positive').optional(),
+  contractStartDate: z.string().optional(),
+  contractEndDate: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export type ConversionFormData = z.infer<typeof conversionSchema>;

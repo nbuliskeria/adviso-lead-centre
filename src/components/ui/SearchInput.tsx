@@ -7,6 +7,7 @@ import { Input } from './Input';
 
 export interface SearchInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   onClear?: () => void;
+  icon?: React.ReactNode;
 }
 
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(

@@ -10,6 +10,8 @@ import KanbanBoard from '../components/kanban/KanbanBoard';
 import LeadCard from '../components/leads/LeadCard';
 import LeadsTable from '../components/leads/LeadsTable';
 import OpportunityCanvas from '../components/leads/OpportunityCanvas';
+import ConversionModal from '../components/leads/ConversionModal';
+import { useConversionWorkflow } from '../hooks/useConversionWorkflow';
 import type { LeadType } from '../components/leads/LeadCard';
 import type { KanbanColumn } from '../components/kanban/KanbanBoard';
 
@@ -26,13 +28,19 @@ function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   
-  // Future state for side panel (Phase 6)
+  // Opportunity Canvas state (Phase 6)
   const [isCanvasOpen, setIsCanvasOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   
-  // Suppress unused variable warnings for Phase 6 features
-  void isCanvasOpen;
-  void selectedLeadId;
+  // Lead-to-Client Conversion workflow (Phase 7)
+  const {
+    isConversionModalOpen,
+    selectedLead,
+    openConversionModal,
+    closeConversionModal,
+    handleConversion,
+    isConverting,
+  } = useConversionWorkflow();
 
   // Helper function to get status colors
   const getStatusColor = (colorName: string) => {
@@ -273,6 +281,15 @@ function LeadsPage() {
       <OpportunityCanvas
         leadId={selectedLeadId}
         onClose={handleCloseCanvas}
+      />
+
+      {/* Lead-to-Client Conversion Modal */}
+      <ConversionModal
+        isOpen={isConversionModalOpen}
+        onClose={closeConversionModal}
+        lead={selectedLead}
+        onConvert={handleConversion}
+        isLoading={isConverting}
       />
     </div>
   );
