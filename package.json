@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "gen:types": "echo 'TypeScript types generated manually from Supabase'"
+    "gen:types": "supabase gen types typescript --linked > src/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
