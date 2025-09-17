@@ -73,3 +73,25 @@ export const taskSchema = z.object({
 
 export type TaskFormData = z.infer<typeof taskSchema>;
 export type SubtaskData = z.infer<typeof subtaskSchema>;
+
+// Client Onboarding Schema
+export const clientOnboardingSchema = z.object({
+  company_id: z.string().min(1, 'Company ID is required'),
+  rs_username: z.string().min(1, 'RS.GE username is required'),
+  rs_password: z.string().min(1, 'RS.GE password is required'),
+  user_emails: z.array(z.object({
+    id: z.string(),
+    email: z.string().email('Invalid email format'),
+    is_primary: z.boolean().default(false),
+  })).default([]),
+  bank_details: z.array(z.object({
+    id: z.string(),
+    bank_name: z.string().min(1, 'Bank name is required'),
+    account_number: z.string().min(1, 'Account number is required'),
+    iban: z.string().min(1, 'IBAN is required'),
+    currency: z.string().default('GEL'),
+  })).default([]),
+  onboarding_completed: z.boolean().default(false),
+});
+
+export type ClientOnboardingFormData = z.infer<typeof clientOnboardingSchema>;

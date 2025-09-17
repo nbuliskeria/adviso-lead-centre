@@ -278,10 +278,10 @@ function TasksPage() {
         {/* View Toggle */}
         <SegmentedControl
           value={viewMode}
-          onChange={setViewMode}
+          onChange={(value) => setViewMode(value as 'list' | 'kanban')}
           options={[
-            { value: 'list', label: 'List', icon: Filter },
-            { value: 'kanban', label: 'Board', icon: Search },
+            { value: 'list', label: 'List', icon: <Filter className="h-4 w-4" /> },
+            { value: 'kanban', label: 'Board', icon: <Search className="h-4 w-4" /> },
           ]}
         />
       </div>

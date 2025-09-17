@@ -29,8 +29,8 @@ function LeadsPage() {
   const [sourceFilter, setSourceFilter] = useState('');
   
   // Opportunity Canvas state (Phase 6)
-  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const isCanvasOpen = selectedLeadId !== null;
   
   // Lead-to-Client Conversion workflow (Phase 7)
   const {
@@ -112,17 +112,15 @@ function LeadsPage() {
 
   // Event handlers
   const handleMoveLead = (leadId: string, newStatus: string) => {
-    updateLead({ id: leadId, status: newStatus });
+    updateLead({ id: leadId, updates: { status: newStatus } });
   };
 
   const handleSelectLead = (leadId: string) => {
     setSelectedLeadId(leadId);
-    setIsCanvasOpen(true);
   };
 
   const handleCloseCanvas = () => {
     setSelectedLeadId(null);
-    setIsCanvasOpen(false);
   };
 
   const handleClearSearch = () => {
@@ -131,7 +129,6 @@ function LeadsPage() {
 
   const handleCreateLead = () => {
     setSelectedLeadId('new');
-    setIsCanvasOpen(true);
   };
 
   // Loading state
