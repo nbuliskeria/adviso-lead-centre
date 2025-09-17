@@ -20,7 +20,7 @@ const fetchLeads = async (): Promise<LeadWithProfile[]> => {
     .from('leads')
     .select(`
       *,
-      lead_owner_profile:user_profiles!leads_lead_owner_id_fkey (
+      lead_owner_profile:user_profiles!lead_owner_id (
         id,
         first_name,
         last_name,

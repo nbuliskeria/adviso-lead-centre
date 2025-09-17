@@ -79,21 +79,46 @@ export const useOpportunityForm = ({
   // Debounced autosave function
   const debouncedAutosave = useDebounce((data: LeadFormData) => {
     if (mode === 'edit' && leadId && isDirty && isValid) {
-      // Clean up the data for autosave too
-      const cleanedData = {
-        ...data,
-        lead_source: data.lead_source === '' ? null : data.lead_source,
-        status: data.status === '' ? null : data.status,
-        priority: data.priority === '' ? null : data.priority,
-        subscription_package: data.subscription_package === '' ? null : data.subscription_package,
-        client_health: data.client_health === '' ? null : data.client_health,
-        customization_notes: data.customization_notes === '' ? null : data.customization_notes,
-        potential_mrr: data.potential_mrr === 0 ? null : data.potential_mrr,
-        customization_fee: data.customization_fee === 0 ? null : data.customization_fee,
-      };
+      // Enhanced data cleaning for autosave
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => {
+          // Handle subscription package constraint
+          if (key === 'subscription_package') {
+            if (!value || value === '') return [key, null];
+            const validPackages = ['Starter', 'Professional', 'Enterprise', 'Custom'];
+            if (!validPackages.includes(value as string)) {
+              return [key, null];
+            }
+          }
+          
+          // Handle priority constraint (ensure lowercase)
+          if (key === 'priority') {
+            if (!value || value === '') return [key, null];
+            return [key, (value as string).toLowerCase()];
+          }
+          
+          // Handle status constraint
+          if (key === 'status') {
+            if (!value || value === '') return [key, null];
+            const statusMap: { [key: string]: string } = {
+              'New': 'New Lead',
+              'new': 'New Lead'
+            };
+            return [key, statusMap[value as string] || value];
+          }
+          
+          // Handle numeric fields
+          if ((key === 'potential_mrr' || key === 'customization_fee') && value === 0) {
+            return [key, null];
+          }
+          
+          // General null handling
+          return [key, value === '' ? null : value];
+        })
+      );
       
       updateLeadMutation.mutate(
-        { id: leadId, ...cleanedData },
+        { id: leadId, updates: cleanedData },
         {
           onSuccess: () => {
             // Silent success for autosave
@@ -150,7 +175,7 @@ export const useOpportunityForm = ({
         });
       } else if (mode === 'edit' && leadId) {
         await updateLeadMutation.mutateAsync(
-          { id: leadId, ...cleanedData },
+          { id: leadId, updates: cleanedData },
           {
             onSuccess: () => {
               addToast('Lead updated successfully!', 'success');
