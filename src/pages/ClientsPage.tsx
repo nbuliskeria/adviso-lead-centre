@@ -1,21 +1,26 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, Users, Filter } from 'lucide-react';
-import { useClients } from '../hooks/queries';
+// import { useClients } from '../hooks/queries'; // TODO: Re-enable when clients table exists
 import { CLIENT_STATUS_OPTIONS, SUBSCRIPTION_PACKAGE_OPTIONS } from '../lib/constants';
 import { Button } from '../components/ui/Button';
 import { SearchInput } from '../components/ui/SearchInput';
 import { Select } from '../components/ui/Select';
 import ClientsTable from '../components/clients/ClientsTable';
-import ClientDetailPanel from '../components/clients/ClientDetailPanel';
+// import ClientDetailPanel from '../components/clients/ClientDetailPanel'; // TODO: Re-enable when clients table exists
 import { useToast } from '../hooks/useToast';
 
 function ClientsPage() {
   const location = useLocation();
   const { addToast } = useToast();
   
-  // Real data from database
-  const { data: clients = [], isLoading, error } = useClients();
+  // TODO: Re-enable when clients table exists
+  // const { data: clients = [], isLoading, error } = useClients();
+  
+  // Temporary mock data to prevent errors
+  const clients: any[] = [];
+  const isLoading = false;
+  const error = null;
 
   // Local state for UI controls
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,12 +211,12 @@ function ClientsPage() {
         )}
       </div>
 
-      {/* Client Detail Panel */}
-      <ClientDetailPanel
+      {/* Client Detail Panel - TODO: Re-enable when clients table exists */}
+      {/* <ClientDetailPanel
         isOpen={isDetailPanelOpen}
         clientId={selectedClientId}
         onClose={handleCloseDetailPanel}
-      />
+      /> */}
     </div>
   );
 }
