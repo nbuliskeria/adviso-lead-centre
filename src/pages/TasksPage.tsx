@@ -226,7 +226,7 @@ function TasksPage() {
           {/* Search */}
           <SearchInput
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             onClear={handleClearSearch}
             placeholder="Search tasks..."
             className="w-full sm:w-64"
@@ -241,7 +241,7 @@ function TasksPage() {
             >
               <option value="">All Status</option>
               {TASK_STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}
@@ -254,7 +254,7 @@ function TasksPage() {
             >
               <option value="">All Priority</option>
               {TASK_PRIORITY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}
@@ -267,7 +267,7 @@ function TasksPage() {
             >
               <option value="">All Categories</option>
               {TASK_CATEGORY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}

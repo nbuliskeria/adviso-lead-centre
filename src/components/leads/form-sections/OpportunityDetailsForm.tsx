@@ -5,6 +5,7 @@ import { Label } from '../../ui/Label';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { LEAD_STATUS_OPTIONS, LEAD_PRIORITY_OPTIONS, SUBSCRIPTION_PACKAGE_OPTIONS } from '../../../lib/constants';
+import { useUsersForSelect } from '../../../hooks/queries/useUsers';
 import type { LeadFormData } from '../../../lib/schemas';
 
 interface OpportunityDetailsFormProps {
@@ -14,6 +15,8 @@ interface OpportunityDetailsFormProps {
 }
 
 const OpportunityDetailsForm = ({ register, control, errors }: OpportunityDetailsFormProps) => {
+  const { data: users = [], isLoading: usersLoading } = useUsersForSelect();
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,12 +29,27 @@ const OpportunityDetailsForm = ({ register, control, errors }: OpportunityDetail
             <Label htmlFor="lead_owner" required>
               Lead Owner
             </Label>
-            <Input
-              id="lead_owner"
-              {...register('lead_owner')}
-              error={!!errors.lead_owner}
-              placeholder="Enter lead owner name"
-              className="mt-1"
+            <Controller
+              name="lead_owner"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  id="lead_owner"
+                  {...field}
+                  error={!!errors.lead_owner}
+                  className="mt-1"
+                  disabled={usersLoading}
+                >
+                  <option value="">
+                    {usersLoading ? 'Loading users...' : 'Select lead owner'}
+                  </option>
+                  {users.map((user) => (
+                    <option key={user.value} value={user.label}>
+                      {user.label}
+                    </option>
+                  ))}
+                </Select>
+              )}
             />
             {errors.lead_owner && (
               <p className="mt-1 text-sm text-[var(--color-destructive)]">
