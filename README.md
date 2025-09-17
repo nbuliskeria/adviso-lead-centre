@@ -1,69 +1,124 @@
-# React + TypeScript + Vite
+# Adviso Lead Centre
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern Lead Management System built with React, TypeScript, Vite, and Supabase.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Modern Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS
+- **Backend**: Supabase with PostgreSQL database
+- **Real-time Data**: Live updates and synchronization
+- **Type Safety**: Full TypeScript integration with database types
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Code Quality**: ESLint, Prettier, and pre-commit hooks
 
-## Expanding the ESLint configuration
+## 📋 Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd adviso-lead-centre
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Update `.env.local` with your Supabase credentials:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+## 🗄️ Database Schema
+
+The application uses the following main tables:
+
+- **leads**: Core lead information and tracking
+- **user_profiles**: User management and authentication
+- **client_tasks**: Task management for leads
+- **contacts**: Contact information for each lead
+- **activities**: Activity tracking and history
+- **teams**: Team management and assignments
+
+## 📝 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run gen:types` - Generate TypeScript types from Supabase
+
+## 🏗️ Project Structure
+
+```
+src/
+├── lib/
+│   ├── supabaseClient.ts    # Supabase client configuration
+│   ├── database.types.ts    # Generated TypeScript types
+│   └── utils.ts            # Utility functions
+├── components/             # React components
+├── pages/                 # Page components
+├── hooks/                 # Custom React hooks
+└── App.tsx               # Main application component
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔧 Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Code Style
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+This project uses:
+- **ESLint** for code linting
+- **Prettier** for code formatting
+- **TypeScript** for type safety
+
+### Database Types
+
+TypeScript types are generated from the Supabase database schema. To update types after database changes:
+
+```bash
+npm run gen:types
 ```
+
+## 🚀 Deployment
+
+The project is ready for deployment on platforms like:
+- Vercel
+- Netlify
+- Railway
+- Any static hosting service
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions, please open an issue in the GitHub repository.
