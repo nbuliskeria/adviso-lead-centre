@@ -8,7 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 import type { Database } from '../../lib/database.types';
 
-type TaskRow = Database['public']['Tables']['tasks']['Row'];
+type TaskRow = Database['public']['Tables']['client_tasks']['Row'];
 
 interface TodaysAgendaProps {
   tasks: TaskRow[];
@@ -23,7 +23,7 @@ const TodaysAgenda = ({ tasks, className }: TodaysAgendaProps) => {
     if (!profile?.id) return { overdueTasks: [], todayTasks: [] };
 
     const userTasks = tasks.filter(task => 
-      task.assigned_to === profile.id && task.status !== 'Done'
+      task.assignee_id === profile.id && task.status !== 'Done'
     );
 
     const overdue: TaskRow[] = [];
@@ -96,8 +96,8 @@ const TodaysAgenda = ({ tasks, className }: TodaysAgendaProps) => {
           {task.title}
         </p>
         <div className="flex items-center space-x-2 mt-1">
-          <span className={cn('text-xs', getPriorityColor(task.priority))}>
-            {task.priority?.toUpperCase()}
+          <span className={cn('text-xs', getPriorityColor(task.priority || 'medium'))}>
+            {task.priority?.toUpperCase() || 'MEDIUM'}
           </span>
           {task.due_date && (
             <span className="text-xs text-[var(--color-text-muted)]">

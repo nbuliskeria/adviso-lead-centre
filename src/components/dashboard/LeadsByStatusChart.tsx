@@ -24,6 +24,19 @@ interface LeadsByStatusChartProps {
 const LeadsByStatusChart = ({ leads, className }: LeadsByStatusChartProps) => {
   const navigate = useNavigate();
 
+  const getStatusColor = (color: string) => {
+    const colorMap: Record<string, string> = {
+      blue: '#3B82F6',
+      green: '#10B981',
+      yellow: '#F59E0B',
+      orange: '#F97316',
+      emerald: '#059669',
+      red: '#EF4444',
+      gray: '#6B7280',
+    };
+    return colorMap[color] || '#6B7280';
+  };
+
   const chartData = useMemo(() => {
     // Count leads by status
     const statusCounts = LEAD_STATUS_OPTIONS.reduce((acc, status) => {
@@ -46,19 +59,6 @@ const LeadsByStatusChart = ({ leads, className }: LeadsByStatusChartProps) => {
       color: getStatusColor(status.color),
     }));
   }, [leads]);
-
-  const getStatusColor = (color: string) => {
-    const colorMap: Record<string, string> = {
-      blue: '#3B82F6',
-      green: '#10B981',
-      yellow: '#F59E0B',
-      orange: '#F97316',
-      emerald: '#059669',
-      red: '#EF4444',
-      gray: '#6B7280',
-    };
-    return colorMap[color] || '#6B7280';
-  };
 
   const handleBarClick = (data: any) => {
     navigate('/lead-database', {

@@ -118,16 +118,16 @@ function DashboardPage() {
     const newLeadsCount = currentLeads.length;
     const previousNewLeadsCount = previousLeads.length;
 
-    // Overdue Tasks (for current user) - using owner_id instead of assigned_to
+    // Overdue Tasks (for current user) - using assignee_id
     const userOverdueTasks = currentTasks.filter(task => 
-      task.owner_id === profile?.id && 
+      task.assignee_id === profile?.id && 
       task.status !== 'Done' &&
       task.due_date &&
       new Date(task.due_date) < now
     ).length;
 
     const previousUserOverdueTasks = tasks.filter(task => 
-      task.owner_id === profile?.id && 
+      task.assignee_id === profile?.id && 
       task.status !== 'Done' &&
       task.due_date &&
       new Date(task.due_date) < previousCutoffDate
