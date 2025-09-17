@@ -6,15 +6,17 @@ export { useLeads, useLead } from './useLeads';
 export { useUpdateLead, useCreateLead, useDeleteLead } from './useUpdateLead';
 
 // Clients
-export { useClients, useClient } from './useClients';
-export { useConvertLeadToClient } from './useConvertLeadToClient';
+// Client-related hooks - TODO: Uncomment when database is ready
+// export * from './useClients';
+// export * from './useConvertLeadToClient';
 
 // Tasks
 export { useTasks, useTasksByLead, useTask } from './useTasks';
 export { useUpdateTask, useCreateTask, useDeleteTask } from './useUpdateTask';
 
-// Task Templates
-export { useTaskTemplates, useTaskTemplate, useApplyTemplate } from './useTaskTemplates';
+// Task Templates - TODO: Uncomment when database is ready
+// export * from './useTaskTemplates';
+// export { useTaskTemplates, useTaskTemplate, useApplyTemplate } from './useTaskTemplates';
 
 // Users
 export { useUsers, useUser, useUsersForSelect } from './useUsers';

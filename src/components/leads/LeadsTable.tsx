@@ -1,7 +1,7 @@
 // src/components/leads/LeadsTable.tsx
 // import { useMemo } from 'react'; // Removed as not currently used
 import { format } from 'date-fns';
-import { Building2, DollarSign, Calendar, ExternalLink } from 'lucide-react';
+import { Building2, DollarSign, Calendar, ExternalLink, ArrowRight } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import { cn } from '../../lib/utils';
 import type { LeadType } from './LeadCard';
@@ -9,10 +9,11 @@ import type { LeadType } from './LeadCard';
 interface LeadsTableProps {
   leads: LeadType[];
   onSelectLead: (leadId: string) => void;
+  onConvert?: (lead: any) => void; // TODO: Fix type when database is connected
   className?: string;
 }
 
-const LeadsTable = ({ leads, onSelectLead, className }: LeadsTableProps) => {
+const LeadsTable = ({ leads, onSelectLead, onConvert, className }: LeadsTableProps) => {
   const formatCurrency = (value: number | null) => {
     if (!value) return '-';
     return new Intl.NumberFormat('en-US', {
@@ -88,6 +89,9 @@ const LeadsTable = ({ leads, onSelectLead, className }: LeadsTableProps) => {
               <th className="text-left py-3 px-4 font-semibold text-[var(--color-text-primary)]">
                 Created
               </th>
+              <th className="text-left py-3 px-4 font-semibold text-[var(--color-text-primary)]">
+                Actions
+              </th>
               <th className="w-10"></th>
             </tr>
           </thead>
@@ -161,6 +165,20 @@ const LeadsTable = ({ leads, onSelectLead, className }: LeadsTableProps) => {
                     <Calendar className="h-3 w-3" />
                     {formatDate(lead.created_at)}
                   </div>
+                </td>
+                <td className="py-4 px-4">
+                  {lead.status === 'Won' && onConvert && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onConvert(lead);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 text-xs bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary)]/90 transition-colors"
+                    >
+                      <ArrowRight className="h-3 w-3" />
+                      Convert
+                    </button>
+                  )}
                 </td>
                 <td className="py-4 px-4">
                   <ExternalLink className="h-4 w-4 text-[var(--color-text-muted)]" />

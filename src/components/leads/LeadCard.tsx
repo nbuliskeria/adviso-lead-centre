@@ -1,7 +1,7 @@
 // src/components/leads/LeadCard.tsx
 import { useMemo } from 'react';
 import { format, isPast, isToday } from 'date-fns';
-import { Building2, DollarSign, Calendar, AlertCircle, CheckSquare } from 'lucide-react';
+import { Building2, DollarSign, Calendar, AlertCircle, CheckSquare, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '../ui/Card';
 import Avatar from '../ui/Avatar';
 import { cn } from '../../lib/utils';
@@ -31,9 +31,10 @@ interface LeadCardProps {
   lead: LeadType;
   onClick: () => void;
   isDragging?: boolean;
+  onConvert?: (lead: any) => void; // TODO: Fix type when database is connected
 }
 
-const LeadCard = ({ lead, onClick, isDragging = false }: LeadCardProps) => {
+const LeadCard = ({ lead, onClick, isDragging = false, onConvert }: LeadCardProps) => {
   // Format potential value
   const formattedValue = useMemo(() => {
     if (!lead.potential_mrr) return null;
@@ -155,6 +156,22 @@ const LeadCard = ({ lead, onClick, isDragging = false }: LeadCardProps) => {
             </div>
           </div>
         </div>
+
+        {/* Conversion Button for Won Leads */}
+        {lead.status === 'Won' && onConvert && (
+          <div className="mt-3 pt-3 border-t border-[var(--color-border)]">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onConvert(lead);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary)]/90 transition-colors text-sm font-medium"
+            >
+              <ArrowRight className="h-4 w-4" />
+              Convert to Client
+            </button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

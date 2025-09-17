@@ -103,6 +103,7 @@ function LeadsPage() {
             key={lead.id}
             lead={lead}
             onClick={() => handleSelectLead(lead.id)}
+            onConvert={openConversionModal}
           />
         )),
       };
@@ -273,6 +274,7 @@ function LeadsPage() {
           <LeadsTable
             leads={filteredLeads}
             onSelectLead={handleSelectLead}
+            onConvert={openConversionModal}
           />
         )}
       </div>

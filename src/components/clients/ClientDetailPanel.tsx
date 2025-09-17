@@ -84,7 +84,7 @@ export default function ClientDetailPanel({ isOpen, clientId, onClose }: ClientD
   }
 
   return (
-    <SidePanel isOpen={isOpen} onClose={onClose}>
+    <SidePanel isOpen={isOpen} onClose={onClose} title="Client Details">
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">

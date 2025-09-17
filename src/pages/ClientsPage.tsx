@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Plus, Users, Filter } from 'lucide-react';
-// import { useClients } from '../hooks/queries';
+// import { useClients } from '../hooks/queries'; // TODO: Uncomment when database is ready
 import { CLIENT_STATUS_OPTIONS, SUBSCRIPTION_PACKAGE_OPTIONS } from '../lib/constants';
 import { Button } from '../components/ui/Button';
 import { SearchInput } from '../components/ui/SearchInput';
