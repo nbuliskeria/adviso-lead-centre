@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:types": "echo 'TypeScript types generated manually from Supabase'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
