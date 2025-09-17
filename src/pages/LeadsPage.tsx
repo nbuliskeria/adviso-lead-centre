@@ -1,50 +1,279 @@
-function LeadsPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Lead Database</h1>
-        <p className="text-gray-600">
-          Manage and track all your leads in one place.
-        </p>
-      </div>
+import { useState, useMemo } from 'react';
+import { Plus, LayoutGrid, Table2 } from 'lucide-react';
+import { useLeads, useUpdateLead } from '../hooks/queries';
+import { LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS } from '../lib/constants';
+import { Button } from '../components/ui/Button';
+import { SearchInput } from '../components/ui/SearchInput';
+import { Select } from '../components/ui/Select';
+import { SegmentedControl } from '../components/ui/SegmentedControl';
+import KanbanBoard from '../components/kanban/KanbanBoard';
+import LeadCard from '../components/leads/LeadCard';
+import LeadsTable from '../components/leads/LeadsTable';
+import OpportunityCanvas from '../components/leads/OpportunityCanvas';
+import type { LeadType } from '../components/leads/LeadCard';
+import type { KanbanColumn } from '../components/kanban/KanbanBoard';
 
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-        <div className="text-center">
-          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+type ViewMode = 'kanban' | 'table';
+
+function LeadsPage() {
+  // Data fetching and mutations
+  const { data: leads = [], isLoading, error } = useLeads();
+  const { mutate: updateLead } = useUpdateLead();
+
+  // Local state for UI controls
+  const [viewMode, setViewMode] = useState<ViewMode>('kanban');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
+  
+  // Future state for side panel (Phase 6)
+  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  
+  // Suppress unused variable warnings for Phase 6 features
+  void isCanvasOpen;
+  void selectedLeadId;
+
+  // Helper function to get status colors
+  const getStatusColor = (colorName: string) => {
+    const colorMap: Record<string, string> = {
+      blue: '#3B82F6',
+      green: '#10B981',
+      yellow: '#F59E0B',
+      orange: '#F97316',
+      emerald: '#059669',
+      red: '#EF4444',
+      gray: '#6B7280',
+    };
+    return colorMap[colorName] || colorMap.gray;
+  };
+
+  // Client-side filtering with useMemo for performance
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead: LeadType) => {
+      // Search term filter
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = 
+          lead.company_name.toLowerCase().includes(searchLower) ||
+          lead.industry.toLowerCase().includes(searchLower) ||
+          lead.lead_owner.toLowerCase().includes(searchLower) ||
+          (lead.lead_owner_profile?.display_name?.toLowerCase().includes(searchLower)) ||
+          (lead.lead_owner_profile?.first_name?.toLowerCase().includes(searchLower)) ||
+          (lead.lead_owner_profile?.last_name?.toLowerCase().includes(searchLower));
+        
+        if (!matchesSearch) return false;
+      }
+
+      // Status filter
+      if (statusFilter && lead.status !== statusFilter) {
+        return false;
+      }
+
+      // Source filter
+      if (sourceFilter && lead.lead_source !== sourceFilter) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [leads, searchTerm, statusFilter, sourceFilter]);
+
+  // Kanban columns generation
+  const kanbanColumns: KanbanColumn[] = useMemo(() => {
+    return LEAD_STATUS_OPTIONS.map((status) => {
+      const columnLeads = filteredLeads.filter((lead: LeadType) => 
+        (lead.status || 'New Lead') === status.value
+      );
+      
+      return {
+        id: status.value as string, // Type assertion since we know status.value is string
+        title: status.label,
+        color: getStatusColor(status.color),
+        items: columnLeads.map((lead: LeadType) => (
+          <LeadCard
+            key={lead.id}
+            lead={lead}
+            onClick={() => handleSelectLead(lead.id)}
+          />
+        )),
+      };
+    });
+  }, [filteredLeads]);
+
+  // Event handlers
+  const handleMoveLead = (leadId: string, newStatus: string) => {
+    updateLead({ id: leadId, status: newStatus });
+  };
+
+  const handleSelectLead = (leadId: string) => {
+    setSelectedLeadId(leadId);
+    setIsCanvasOpen(true);
+  };
+
+  const handleCloseCanvas = () => {
+    setSelectedLeadId(null);
+    setIsCanvasOpen(false);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
+
+  const handleCreateLead = () => {
+    setSelectedLeadId('new');
+    setIsCanvasOpen(true);
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">Lead Database</h1>
+            <p className="text-[var(--color-text-secondary)] mt-1">
+              Manage and track all your leads in one place.
+            </p>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Lead Management Coming Soon
-          </h3>
-          <p className="text-gray-500 mb-6">
-            This page will contain comprehensive lead management features including:
-          </p>
-          <div className="text-left max-w-md mx-auto space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Lead creation and editing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Advanced filtering and search</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Lead status tracking</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Contact management</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Activity timeline</span>
-            </div>
+        </div>
+        
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+            <p className="text-[var(--color-text-secondary)]">Loading leads...</p>
           </div>
         </div>
       </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">Lead Database</h1>
+            <p className="text-[var(--color-text-secondary)] mt-1">
+              Manage and track all your leads in one place.
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-[var(--color-destructive)] mb-4">
+              <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">
+              Error Loading Leads
+            </h3>
+            <p className="text-[var(--color-text-secondary)]">
+              {error.message || 'Failed to load leads. Please try again.'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--color-text-primary)]">Lead Database</h1>
+          <p className="text-[var(--color-text-secondary)] mt-1">
+            Manage and track all your leads in one place.
+          </p>
+        </div>
+        
+        <Button onClick={handleCreateLead} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Log Opportunity
+        </Button>
+      </div>
+
+      {/* Controls Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          {/* Search Input */}
+          <div className="w-full sm:w-80">
+            <SearchInput
+              placeholder="Search leads..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClear={handleClearSearch}
+            />
+          </div>
+          
+          {/* Filters */}
+          <div className="flex gap-3">
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {LEAD_STATUS_OPTIONS.map((status) => (
+                <option key={status.value} value={status.value || ''}>
+                  {status.label}
+                </option>
+              ))}
+            </Select>
+            
+            <Select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+            >
+              <option value="">All Sources</option>
+              {LEAD_SOURCE_OPTIONS.map((source) => (
+                <option key={source.value} value={source.value || ''}>
+                  {source.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        {/* View Mode Toggle */}
+        <SegmentedControl
+          options={[
+            { value: 'kanban', label: 'Board', icon: <LayoutGrid className="h-4 w-4" /> },
+            { value: 'table', label: 'Table', icon: <Table2 className="h-4 w-4" /> },
+          ]}
+          value={viewMode}
+          onChange={(value) => setViewMode(value as ViewMode)}
+        />
+      </div>
+
+      {/* Results Summary */}
+      <div className="text-sm text-[var(--color-text-muted)]">
+        Showing {filteredLeads.length} of {leads.length} leads
+      </div>
+
+      {/* Main Content */}
+      <div className="min-h-[600px]">
+        {viewMode === 'kanban' ? (
+          <KanbanBoard
+            columns={kanbanColumns}
+            onMoveItem={handleMoveLead}
+          />
+        ) : (
+          <LeadsTable
+            leads={filteredLeads}
+            onSelectLead={handleSelectLead}
+          />
+        )}
+      </div>
+
+      {/* Opportunity Canvas */}
+      <OpportunityCanvas
+        leadId={selectedLeadId}
+        onClose={handleCloseCanvas}
+      />
     </div>
   );
 }

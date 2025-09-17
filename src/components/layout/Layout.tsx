@@ -11,7 +11,12 @@ function Layout() {
   };
 
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div 
+      className="h-screen flex"
+      style={{
+        background: 'var(--color-background-secondary)',
+      } as React.CSSProperties}
+    >
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
@@ -21,10 +26,10 @@ function Layout() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-md"
             onClick={toggleMobileMenu}
           />
-          <div className="fixed inset-y-0 left-0 w-64 bg-white">
+          <div className="fixed inset-y-0 left-0 w-64 glass-card">
             <Sidebar />
           </div>
         </div>
@@ -34,8 +39,16 @@ function Layout() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={toggleMobileMenu} />
         
-        <main className="flex-1 overflow-auto">
-          <div className="p-6">
+        <main 
+          className="flex-1 overflow-auto relative"
+          style={{
+            background: 'var(--color-background-secondary)',
+          } as React.CSSProperties}
+        >
+          {/* Gradient mesh overlay for dark mode */}
+          <div className="absolute inset-0 gradient-mesh dark:opacity-100 opacity-0 pointer-events-none" />
+          
+          <div className="relative p-6 space-y-6">
             <Outlet />
           </div>
         </main>

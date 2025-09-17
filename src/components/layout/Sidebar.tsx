@@ -7,10 +7,11 @@ import {
   Settings, 
   ChevronLeft, 
   ChevronRight,
-  LogOut
+  LogOut,
+  TestTube
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useAuth } from '../../hooks/useAuth';
+import { useLocalStorage } from '../../hooks/use-local-storage';
 import Avatar from '../ui/Avatar';
 import { cn } from '../../lib/utils';
 
@@ -20,6 +21,8 @@ const navigation = [
   { name: 'Client Space', href: '/client-space', icon: Building2 },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Admin Panel', href: '/admin-panel', icon: Settings },
+  { name: 'Test Components', href: '/test-components', icon: TestTube },
+  { name: 'Test Data', href: '/test-data', icon: TestTube },
 ];
 
 export function Sidebar() {
@@ -27,7 +30,9 @@ export function Sidebar() {
   const { profile, signOut } = useAuth();
   const [isCollapsed, setIsCollapsed] = useLocalStorage('sidebar-collapsed', false);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsCollapsed(!isCollapsed);
   };
 
@@ -41,26 +46,31 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      'bg-white border-r border-gray-200 flex flex-col transition-all duration-300',
+      'flex flex-col h-full bg-[var(--color-background)] border-r border-[var(--color-border)] transition-all duration-300',
       isCollapsed ? 'w-16' : 'w-64'
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          {!isCollapsed && (
-            <h1 className="text-xl font-bold text-gray-900">Adviso</h1>
+      <div className="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+        <h1 className={cn(
+          'text-xl font-bold text-[var(--color-primary)] transition-opacity duration-300',
+          isCollapsed ? 'opacity-0 w-0' : 'opacity-100'
+        )}>
+          Adviso
+        </h1>
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-lg hover:bg-[var(--color-background-secondary)] transition-colors cursor-pointer z-10 relative"
+          type="button"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          style={{ minWidth: '32px', minHeight: '32px' }}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4 text-[var(--color-text-secondary)]" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 text-[var(--color-text-secondary)]" />
           )}
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-5 w-5 text-gray-500" />
-            ) : (
-              <ChevronLeft className="h-5 w-5 text-gray-500" />
-            )}
-          </button>
-        </div>
+        </button>
       </div>
 
       {/* Navigation */}
@@ -72,10 +82,11 @@ export function Sidebar() {
               key={item.name}
               to={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-[var(--adviso-brand-200)] text-[var(--color-primary)] border border-[var(--adviso-brand-300)]'
+                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-background-secondary)] hover:text-[var(--color-text-primary)]',
+                isCollapsed && 'justify-center px-2'
               )}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -86,7 +97,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile Footer */}
-      <div className="mt-auto p-4 border-t border-gray-200">
+      <div className="mt-auto p-4 border-t border-[var(--color-border)]">
         <div className="flex items-center gap-3 p-2 mb-2">
           <Avatar 
             name={getDisplayName()} 
@@ -95,10 +106,10 @@ export function Sidebar() {
           />
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="font-medium text-sm text-gray-900 truncate">
+              <p className="font-medium text-sm text-[var(--color-text-primary)] truncate">
                 {getDisplayName()}
               </p>
-              <p className="text-xs text-gray-500 truncate">
+              <p className="text-xs text-[var(--color-text-muted)] truncate">
                 {profile?.email}
               </p>
             </div>
@@ -107,7 +118,7 @@ export function Sidebar() {
         <button
           onClick={signOut}
           className={cn(
-            'flex items-center gap-3 w-full p-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors',
+            'flex items-center gap-3 w-full p-2 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-background-secondary)] hover:text-[var(--color-text-primary)] transition-colors',
             isCollapsed && 'justify-center'
           )}
         >
