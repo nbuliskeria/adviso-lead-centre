@@ -1,171 +1,216 @@
+import { useState, useMemo } from 'react';
+import { subDays, isAfter, parseISO } from 'date-fns';
+import { useLeads } from '../hooks/queries/useLeads';
+import { useTasks } from '../hooks/queries/useTasks';
 import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../hooks/useToast';
-import { Button } from '../components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
-import { Plus, Users, Building2, CheckSquare, DollarSign } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, AlertTriangle } from 'lucide-react';
+import DashboardSkeleton from '../components/dashboard/DashboardSkeleton';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import StatCard from '../components/dashboard/StatCard';
+import LeadsByStatusChart from '../components/dashboard/LeadsByStatusChart';
+import LeadSourceChart from '../components/dashboard/LeadSourceChart';
+import TodaysAgenda from '../components/dashboard/TodaysAgenda';
 
 function DashboardPage() {
   const { profile } = useAuth();
-  const { addToast } = useToast();
+  const [dateRange, setDateRange] = useState('30d');
 
-  const getDisplayName = () => {
-    if (profile?.display_name) return profile.display_name;
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name} ${profile.last_name}`;
+  // Data fetching
+  const { data: leads = [], isLoading: leadsLoading } = useLeads();
+  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
+  
+  // Combined loading state
+  const isLoading = leadsLoading || tasksLoading;
+
+  // Filter data based on date range
+  const filteredData = useMemo(() => {
+    const now = new Date();
+    let cutoffDate: Date;
+
+    switch (dateRange) {
+      case '30d':
+        cutoffDate = subDays(now, 30);
+        break;
+      case '90d':
+        cutoffDate = subDays(now, 90);
+        break;
+      case '180d':
+        cutoffDate = subDays(now, 180);
+        break;
+      case '365d':
+        cutoffDate = subDays(now, 365);
+        break;
+      default:
+        cutoffDate = new Date(0); // All time
     }
-    return profile?.first_name || 'User';
-  };
 
-  const handleQuickAction = (action: string) => {
-    addToast(`${action} feature coming soon!`, 'info');
-  };
+    const filteredLeads = dateRange === 'all' ? leads : leads.filter(lead => 
+      lead.created_at && isAfter(parseISO(lead.created_at), cutoffDate)
+    );
+
+    const filteredTasks = dateRange === 'all' ? tasks : tasks.filter(task => 
+      task.created_at && isAfter(parseISO(task.created_at), cutoffDate)
+    );
+
+    return { leads: filteredLeads, tasks: filteredTasks };
+  }, [leads, tasks, dateRange]);
+
+  // Calculate metrics with previous period comparison
+  const metrics = useMemo(() => {
+    const { leads: currentLeads, tasks: currentTasks } = filteredData;
+    
+    // Calculate previous period data for comparison
+    const now = new Date();
+    let previousCutoffDate: Date;
+    let previousStartDate: Date;
+
+    switch (dateRange) {
+      case '30d':
+        previousCutoffDate = subDays(now, 30);
+        previousStartDate = subDays(now, 60);
+        break;
+      case '90d':
+        previousCutoffDate = subDays(now, 90);
+        previousStartDate = subDays(now, 180);
+        break;
+      case '180d':
+        previousCutoffDate = subDays(now, 180);
+        previousStartDate = subDays(now, 360);
+        break;
+      case '365d':
+        previousCutoffDate = subDays(now, 365);
+        previousStartDate = subDays(now, 730);
+        break;
+      default:
+        // For "all time", compare with half the data
+        const totalDays = leads.length > 0 ? 
+          Math.floor((now.getTime() - new Date(Math.min(...leads.map(l => new Date(l.created_at || 0).getTime()))).getTime()) / (1000 * 60 * 60 * 24)) : 
+          30;
+        previousCutoffDate = subDays(now, totalDays / 2);
+        previousStartDate = new Date(0);
+    }
+
+    const previousLeads = dateRange === 'all' ? 
+      leads.slice(0, Math.floor(leads.length / 2)) :
+      leads.filter(lead => 
+        lead.created_at && 
+        isAfter(parseISO(lead.created_at), previousStartDate) &&
+        !isAfter(parseISO(lead.created_at), previousCutoffDate)
+      );
+
+    // Pipeline Value (sum of potential_mrr for open leads)
+    const currentPipelineValue = currentLeads
+      .filter(lead => !['Won', 'Lost'].includes(lead.status || ''))
+      .reduce((sum, lead) => sum + (lead.potential_mrr || 0), 0);
+
+    const previousPipelineValue = previousLeads
+      .filter(lead => !['Won', 'Lost'].includes(lead.status || ''))
+      .reduce((sum, lead) => sum + (lead.potential_mrr || 0), 0);
+
+    // Conversion Rate
+    const currentWonLeads = currentLeads.filter(lead => lead.status === 'Won').length;
+    const currentConversionRate = currentLeads.length > 0 ? (currentWonLeads / currentLeads.length) * 100 : 0;
+
+    const previousWonLeads = previousLeads.filter(lead => lead.status === 'Won').length;
+    const previousConversionRate = previousLeads.length > 0 ? (previousWonLeads / previousLeads.length) * 100 : 0;
+
+    // New Leads
+    const newLeadsCount = currentLeads.length;
+    const previousNewLeadsCount = previousLeads.length;
+
+    // Overdue Tasks (for current user) - using owner_id instead of assigned_to
+    const userOverdueTasks = currentTasks.filter(task => 
+      task.owner_id === profile?.id && 
+      task.status !== 'Done' &&
+      task.due_date &&
+      new Date(task.due_date) < now
+    ).length;
+
+    const previousUserOverdueTasks = tasks.filter(task => 
+      task.owner_id === profile?.id && 
+      task.status !== 'Done' &&
+      task.due_date &&
+      new Date(task.due_date) < previousCutoffDate
+    ).length;
+
+    // Calculate percentage changes
+    const calculateChange = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    return {
+      pipelineValue: {
+        current: currentPipelineValue,
+        change: calculateChange(currentPipelineValue, previousPipelineValue)
+      },
+      conversionRate: {
+        current: currentConversionRate,
+        change: calculateChange(currentConversionRate, previousConversionRate)
+      },
+      newLeads: {
+        current: newLeadsCount,
+        change: calculateChange(newLeadsCount, previousNewLeadsCount)
+      },
+      overdueTasks: {
+        current: userOverdueTasks,
+        change: calculateChange(userOverdueTasks, previousUserOverdueTasks)
+      }
+    };
+  }, [filteredData, dateRange, leads, tasks, profile?.id]);
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">
-            Welcome back, {getDisplayName()}!
-          </h1>
-          <p className="text-[var(--color-text-secondary)] text-lg">
-            Here's what's happening with your leads today.
-          </p>
-        </div>
-        <Button 
-          onClick={() => handleQuickAction('Add New Lead')}
-          className="shadow-lg hover:shadow-xl"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Lead
-        </Button>
-      </div>
+      {/* Header */}
+      <DashboardHeader 
+        dateRange={dateRange} 
+        onDateRangeChange={setDateRange} 
+      />
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Stats Cards using new Card component */}
-        <Card className="group hover:scale-[1.02] transition-all duration-300 float-animation dark:glow-info">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Total Leads</h3>
-                <p className="text-3xl font-bold text-[var(--color-text-primary)] mt-2">49</p>
-                <p className="text-sm text-[var(--color-success)] mt-1 font-medium">+12% from last month</p>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-600/20 rounded-xl dark:glow-info">
-                <Users className="h-8 w-8 text-[var(--color-info)]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="group hover:scale-[1.02] transition-all duration-300 float-animation dark:glow-success" style={{ animationDelay: '1s' } as React.CSSProperties}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Active Clients</h3>
-                <p className="text-3xl font-bold text-[var(--color-text-primary)] mt-2">23</p>
-                <p className="text-sm text-[var(--color-success)] mt-1 font-medium">+8% from last month</p>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-500/10 dark:to-green-600/20 rounded-xl dark:glow-success">
-                <Building2 className="h-8 w-8 text-[var(--color-success)]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="group hover:scale-[1.02] transition-all duration-300 float-animation dark:glow-warning" style={{ animationDelay: '2s' } as React.CSSProperties}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Pending Tasks</h3>
-                <p className="text-3xl font-bold text-[var(--color-text-primary)] mt-2">7</p>
-                <p className="text-sm text-[var(--color-warning)] mt-1 font-medium">3 due today</p>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-500/10 dark:to-amber-600/20 rounded-xl dark:glow-warning">
-                <CheckSquare className="h-8 w-8 text-[var(--color-warning)]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="group hover:scale-[1.02] transition-all duration-300 float-animation dark:glow-accent" style={{ animationDelay: '3s' } as React.CSSProperties}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-[var(--color-text-muted)] uppercase tracking-wide">Monthly Revenue</h3>
-                <p className="text-3xl font-bold text-[var(--color-text-primary)] mt-2">$12,450</p>
-                <p className="text-sm text-[var(--color-success)] mt-1 font-medium">+15% from last month</p>
-              </div>
-              <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-600/20 rounded-xl dark:glow-accent">
-                <DollarSign className="h-8 w-8 text-[var(--color-primary)]" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Open Pipeline Value"
+          value={`$${(metrics.pipelineValue.current / 1000).toFixed(0)}K`}
+          change={metrics.pipelineValue.change}
+          icon={<DollarSign className="h-6 w-6" />}
+        />
+        
+        <StatCard
+          title="Conversion Rate"
+          value={`${metrics.conversionRate.current.toFixed(1)}%`}
+          change={metrics.conversionRate.change}
+          icon={<TrendingUp className="h-6 w-6" />}
+        />
+        
+        <StatCard
+          title="New Leads"
+          value={metrics.newLeads.current}
+          change={metrics.newLeads.change}
+          icon={<Users className="h-6 w-6" />}
+        />
+        
+        <StatCard
+          title="My Overdue Tasks"
+          value={metrics.overdueTasks.current}
+          change={metrics.overdueTasks.change}
+          icon={<AlertTriangle className="h-6 w-6" />}
+        />
       </div>
 
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-[var(--color-background-tertiary)] to-[var(--color-background-secondary)] border-b border-[var(--color-border-light)]">
-          <CardTitle className="text-xl font-semibold text-[var(--color-text-primary)]">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-[var(--color-border-light)]">
-            <div className="flex items-center gap-4 p-6 hover:bg-[var(--color-background-tertiary)] transition-colors">
-              <div className="w-3 h-3 bg-[var(--color-info)] rounded-full shadow-lg"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                  New lead added: TechCorp Solutions
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-6 hover:bg-[var(--color-background-tertiary)] transition-colors">
-              <div className="w-3 h-3 bg-[var(--color-success)] rounded-full shadow-lg"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                  Task completed: Follow up with ABC Corp
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">4 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 p-6 hover:bg-[var(--color-background-tertiary)] transition-colors">
-              <div className="w-3 h-3 bg-[var(--color-warning)] rounded-full shadow-lg"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                  Meeting scheduled with StartupXYZ
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">6 hours ago</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <LeadsByStatusChart leads={filteredData.leads} />
+        <LeadSourceChart leads={filteredData.leads} />
+      </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" onClick={() => handleQuickAction('Add Task')}>
-              <CheckSquare className="h-4 w-4 mr-2" />
-              Add Task
-            </Button>
-            <Button variant="outline" onClick={() => handleQuickAction('Schedule Meeting')}>
-              <Users className="h-4 w-4 mr-2" />
-              Schedule Meeting
-            </Button>
-            <Button variant="outline" onClick={() => handleQuickAction('Generate Report')}>
-              <DollarSign className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
-            <Button variant="outline" onClick={() => handleQuickAction('View Analytics')}>
-              <Building2 className="h-4 w-4 mr-2" />
-              View Analytics
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Today's Agenda */}
+      <TodaysAgenda tasks={tasks} />
     </div>
   );
 }

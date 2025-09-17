@@ -1,5 +1,6 @@
 // src/pages/TasksPage.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, Filter, Search } from 'lucide-react';
 import { isPast, isToday, startOfDay } from 'date-fns';
 import { Button } from '../components/ui/Button';
@@ -51,6 +52,22 @@ function TasksPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithRelations | null>(null);
+
+  // Navigation state handling for dashboard drill-down
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle navigation state from dashboard Today's Agenda
+    if (location.state?.taskId) {
+      const taskToOpen = tasks.find(task => task.id === location.state.taskId);
+      if (taskToOpen) {
+        setSelectedTask(taskToOpen);
+        setIsDetailPanelOpen(true);
+      }
+      // Clear the state so it doesn't re-apply on back navigation
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, tasks]);
 
   // Filter and group tasks
   const filteredTasks = useMemo(() => {

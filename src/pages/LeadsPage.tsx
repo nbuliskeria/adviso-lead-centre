@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Plus, LayoutGrid, Table2 } from 'lucide-react';
 import { useLeads, useUpdateLead } from '../hooks/queries';
 import { LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS } from '../lib/constants';
@@ -31,6 +32,23 @@ function LeadsPage() {
   // Opportunity Canvas state (Phase 6)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const isCanvasOpen = selectedLeadId !== null;
+
+  // Navigation state handling for dashboard drill-down
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle navigation state from dashboard charts
+    if (location.state?.statusFilter) {
+      setStatusFilter(location.state.statusFilter);
+    }
+    if (location.state?.sourceFilter) {
+      setSourceFilter(location.state.sourceFilter);
+    }
+    // Clear the state so it doesn't re-apply on back navigation
+    if (location.state?.statusFilter || location.state?.sourceFilter) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   
   // Lead-to-Client Conversion workflow (Phase 7)
   const {
