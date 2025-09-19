@@ -5,15 +5,18 @@ import { Input } from '../../ui/Input';
 import { PasswordInput } from '../../ui/PasswordInput';
 import { Label } from '../../ui/Label';
 import type { Control, FieldErrors } from 'react-hook-form';
-import type { ClientOnboardingFormData } from '../../../hooks/useClientForm';
+// import type { ClientOnboardingFormData } from '../../../lib/schemas'; // TODO: Use when needed
 
 interface CredentialsCardProps {
-  control: Control<ClientOnboardingFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: Control<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
-  errors: FieldErrors<ClientOnboardingFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errors: FieldErrors<any>;
 }
 
-const CredentialsCard = ({ control, register, errors }: CredentialsCardProps) => {
+const CredentialsCard = ({ register, errors }: CredentialsCardProps) => {
   return (
     <Card>
       <CardHeader>

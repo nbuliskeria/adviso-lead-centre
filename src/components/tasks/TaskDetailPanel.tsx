@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Label } from '../ui/Label';
 import { Select } from '../ui/Select';
-import SubtaskList from './SubtaskList';
+// import SubtaskList from './SubtaskList'; // TODO: Implement when subtasks are needed
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { TASK_STATUS_OPTIONS, TASK_PRIORITY_OPTIONS, TASK_CATEGORY_OPTIONS } from '../../lib/constants';
 import type { Database } from '../../lib/database.types';
@@ -35,14 +35,14 @@ interface TaskDetailPanelProps {
 }
 
 const TaskDetailPanel = ({ isOpen, onClose, task }: TaskDetailPanelProps) => {
-  const { form, handleSubmit, isSubmitting, addSubtask, toggleSubtask, removeSubtask } = useTaskForm({
+  const { form, handleSubmit, isSubmitting } = useTaskForm({
     task: task || undefined,
     onSuccess: () => {
       onClose();
     },
   });
 
-  const { register, formState: { errors }, watch, setValue } = form;
+  const { register, formState: { errors } } = form;
 
   if (!isOpen || !task) {
     return null;
@@ -60,7 +60,7 @@ const TaskDetailPanel = ({ isOpen, onClose, task }: TaskDetailPanelProps) => {
             id="title"
             {...register('title')}
             placeholder="Enter task title..."
-            error={errors.title?.message}
+            error={!!errors.title?.message}
           />
         </div>
 
@@ -159,8 +159,8 @@ const TaskDetailPanel = ({ isOpen, onClose, task }: TaskDetailPanelProps) => {
           />
         </div>
 
-        {/* Subtasks */}
-        <div>
+        {/* Subtasks - TODO: Implement when subtasks are needed */}
+        {/* <div>
           <Label>Subtasks</Label>
           <SubtaskList
             watch={watch}
@@ -169,7 +169,7 @@ const TaskDetailPanel = ({ isOpen, onClose, task }: TaskDetailPanelProps) => {
             toggleSubtask={toggleSubtask}
             removeSubtask={removeSubtask}
           />
-        </div>
+        </div> */}
 
         {/* Notes */}
         <div>

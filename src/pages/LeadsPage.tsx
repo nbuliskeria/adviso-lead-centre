@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, LayoutGrid, Table2 } from 'lucide-react';
+import { Plus, LayoutGrid, Table2, Users } from 'lucide-react';
 import { useLeads, useUpdateLead } from '../hooks/queries';
 import { LEAD_STATUS_OPTIONS, LEAD_SOURCE_OPTIONS } from '../lib/constants';
 import { Button } from '../components/ui/Button';
@@ -31,7 +31,7 @@ function LeadsPage() {
   
   // Opportunity Canvas state (Phase 6)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
-  const isCanvasOpen = selectedLeadId !== null;
+  // const isCanvasOpen = selectedLeadId !== null; // TODO: Use when implementing canvas state
 
   // Navigation state handling for dashboard drill-down
   const location = useLocation();
@@ -126,7 +126,7 @@ function LeadsPage() {
         )),
       };
     });
-  }, [filteredLeads]);
+  }, [filteredLeads, openConversionModal]);
 
   // Event handlers
   const handleMoveLead = (leadId: string, newStatus: string) => {
@@ -280,7 +280,30 @@ function LeadsPage() {
 
       {/* Main Content */}
       <div className="min-h-[600px]">
-        {viewMode === 'kanban' ? (
+        {filteredLeads.length === 0 ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--color-background-secondary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-[var(--color-text-muted)]" />
+              </div>
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">
+                {leads.length === 0 ? 'No leads yet' : 'No leads match your filters'}
+              </h3>
+              <p className="text-[var(--color-text-muted)] mb-4">
+                {leads.length === 0 
+                  ? 'Get started by creating your first lead opportunity.'
+                  : 'Try adjusting your search or filter criteria.'
+                }
+              </p>
+              {leads.length === 0 && (
+                <Button onClick={handleCreateLead} className="flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create Your First Lead
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : viewMode === 'kanban' ? (
           <KanbanBoard
             columns={kanbanColumns}
             onMoveItem={handleMoveLead}

@@ -81,13 +81,15 @@ function DashboardPage() {
         previousCutoffDate = subDays(now, 365);
         previousStartDate = subDays(now, 730);
         break;
-      default:
+      default: {
         // For "all time", compare with half the data
         const totalDays = leads.length > 0 ? 
           Math.floor((now.getTime() - new Date(Math.min(...leads.map(l => new Date(l.created_at || 0).getTime()))).getTime()) / (1000 * 60 * 60 * 24)) : 
           30;
         previousCutoffDate = subDays(now, totalDays / 2);
         previousStartDate = new Date(0);
+        break;
+      }
     }
 
     const previousLeads = dateRange === 'all' ? 

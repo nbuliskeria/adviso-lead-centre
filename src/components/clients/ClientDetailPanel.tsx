@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { Button } from '../ui/Button';
 import Avatar from '../ui/Avatar';
 // import { useClient, useTaskTemplates, useApplyTemplate } from '../../hooks/queries';
-import { useToast } from '../../hooks/useToast';
+// import { useToast } from '../../hooks/useToast'; // TODO: Use when implementing template application
 import { CLIENT_STATUS_OPTIONS } from '../../lib/constants';
 import OnboardingInfoTab from './onboarding/OnboardingInfoTab';
 
@@ -18,38 +18,27 @@ interface ClientDetailPanelProps {
 
 export default function ClientDetailPanel({ isOpen, clientId, onClose }: ClientDetailPanelProps) {
   const [activeTab, setActiveTab] = useState('overview');
-  const { addToast } = useToast();
+  // const { addToast } = useToast(); // TODO: Use when implementing template application
 
   // TODO: Uncomment when database tables are created
   // const { data: client, isLoading: clientLoading } = useClient(clientId || '');
   // const { data: templates = [] } = useTaskTemplates();
   // const { mutate: applyTemplate, isPending: isApplyingTemplate } = useApplyTemplate();
 
-  // Mock data for development
-  const client = null;
+  // Get client data from localStorage
+  const client = clientId ? (() => {
+    try {
+      const storedClients = localStorage.getItem('convertedClients');
+      const clients = storedClients ? JSON.parse(storedClients) : [];
+      return clients.find((c: any) => c.id === clientId) || null;
+    } catch (error) {
+      console.error('Error loading client:', error);
+      return null;
+    }
+  })() : null;
   const clientLoading = false;
-  const templates: any[] = [];
-  const isApplyingTemplate = false;
-
-  const handleApplyTemplate = (templateId: string) => {
-    if (!clientId) return;
-
-    // TODO: Uncomment when database tables are created
-    // applyTemplate(
-    //   { clientId, templateId, assigneeId: client?.account_manager_id },
-    //   {
-    //     onSuccess: () => {
-    //       addToast('Onboarding template applied successfully!', 'success');
-    //     },
-    //     onError: (error) => {
-    //       addToast(`Failed to apply template: ${error.message}`, 'error');
-    //     },
-    //   }
-    // );
-
-    // For now, just show a success message
-    addToast('Onboarding template would be applied here!', 'info');
-  };
+  // const templates: any[] = []; // TODO: Implement when task templates are available
+  // const isApplyingTemplate = false; // TODO: Implement when applying templates
 
   const getStatusColor = (status: string) => {
     const statusOption = CLIENT_STATUS_OPTIONS.find(opt => opt.value === status);
@@ -97,7 +86,7 @@ export default function ClientDetailPanel({ isOpen, clientId, onClose }: ClientD
                 {client?.company_name || 'Client Details'}
               </h2>
               <p className="text-sm text-[var(--color-text-muted)]">
-                {client?.original_lead?.industry || 'Loading...'}
+                {client?.industry || 'Loading...'}
               </p>
             </div>
           </div>
@@ -145,8 +134,8 @@ export default function ClientDetailPanel({ isOpen, clientId, onClose }: ClientD
                       <div>
                         <label className="text-sm font-medium text-[var(--color-text-muted)]">Status</label>
                         <div className="mt-1">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.client_status)}`}>
-                            {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.client_status)?.label || client.client_status}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.status || 'Active')}`}>
+                            {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.status)?.label || client.status || 'Active'}
                           </span>
                         </div>
                       </div>

@@ -4,8 +4,8 @@ import type { SelectHTMLAttributes } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  error?: boolean;
+export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'error'> {
+  error?: boolean | string;
 }
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(

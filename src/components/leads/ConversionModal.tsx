@@ -1,8 +1,7 @@
 // src/components/leads/ConversionModal.tsx
-import { useState } from 'react';
+// import { useState } from 'react'; // TODO: Use when implementing multi-step form
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
 import { Calendar, Building2, DollarSign, User, FileText } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
@@ -33,7 +32,6 @@ export default function ConversionModal({
   isLoading = false,
 }: ConversionModalProps) {
   const { addToast } = useToast();
-  const navigate = useNavigate();
   const { data: users = [] } = useUsersForSelect();
 
   const {
@@ -65,18 +63,9 @@ export default function ConversionModal({
 
     try {
       await onConvert(lead.id, data);
-      addToast(`Successfully converted ${lead.company_name} to client!`, 'success');
+      // Don't show toast here - let the workflow handle it
       handleClose();
-      
-      // Navigate to client space after successful conversion
-      setTimeout(() => {
-        navigate('/client-space', { 
-          state: { 
-            message: `${lead.company_name} has been successfully converted to a client!`,
-            newConversion: true 
-          } 
-        });
-      }, 1000);
+      // Don't navigate here - let the workflow handle it
     } catch (error) {
       console.error('Conversion error:', error);
       addToast('Failed to convert lead to client. Please try again.', 'error');
@@ -86,7 +75,7 @@ export default function ConversionModal({
   const monthlyValue = watch('monthlyValue');
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Convert Lead to Client">
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start gap-4 mb-6">
@@ -151,8 +140,8 @@ export default function ConversionModal({
             >
               <option value="">Select account manager...</option>
               {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.display_name || `${user.first_name} ${user.last_name}`.trim()}
+                <option key={user.value} value={user.value}>
+                  {user.label}
                 </option>
               ))}
             </Select>

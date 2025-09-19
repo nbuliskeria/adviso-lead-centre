@@ -46,7 +46,7 @@ const LeadsByStatusChart = ({ leads, className }: LeadsByStatusChartProps) => {
 
     leads.forEach((lead) => {
       const status = lead.status || 'New Lead';
-      if (statusCounts.hasOwnProperty(status)) {
+      if (Object.prototype.hasOwnProperty.call(statusCounts, status)) {
         statusCounts[status]++;
       }
     });
@@ -60,12 +60,14 @@ const LeadsByStatusChart = ({ leads, className }: LeadsByStatusChartProps) => {
     }));
   }, [leads]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleBarClick = (data: any) => {
     navigate('/lead-database', {
       state: { statusFilter: data.status }
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (

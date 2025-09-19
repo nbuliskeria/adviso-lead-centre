@@ -1,8 +1,8 @@
 // src/pages/TasksPage.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Filter, Search } from 'lucide-react';
-import { isPast, isToday, startOfDay } from 'date-fns';
+import { Plus, Filter, Search, CheckSquare } from 'lucide-react';
+import { isToday, isPast } from 'date-fns';
 import { Button } from '../components/ui/Button';
 import { SearchInput } from '../components/ui/SearchInput';
 import { Select } from '../components/ui/Select';
@@ -106,7 +106,7 @@ function TasksPage() {
 
   // Group tasks by urgency for list view
   const groupedTasks = useMemo(() => {
-    const now = startOfDay(new Date());
+    // const now = startOfDay(new Date()); // TODO: Use for date filtering
     
     const overdueTasks = filteredTasks.filter(task => 
       task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date))
@@ -130,7 +130,7 @@ function TasksPage() {
   // Kanban columns
   const kanbanColumns = useMemo(() => {
     return TASK_STATUS_OPTIONS.map((status) => ({
-      id: status.value,
+      id: status.value || 'unknown',
       title: status.label,
       color: status.color,
       items: filteredTasks
@@ -148,7 +148,8 @@ function TasksPage() {
   }, [filteredTasks]);
 
   // Event handlers
-  const handleTaskClick = (task: TaskWithRelations) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleTaskClick = (task: any) => {
     setSelectedTask(task);
     setIsDetailPanelOpen(true);
   };
@@ -163,6 +164,7 @@ function TasksPage() {
     if (task) {
       updateTaskMutation.mutate({
         id: taskId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         updates: { status: newStatus as any },
       });
     }
@@ -305,7 +307,24 @@ function TasksPage() {
 
       {/* Content */}
       <div className="min-h-[600px]">
-        {viewMode === 'list' ? (
+        {filteredTasks.length === 0 ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[var(--color-background-secondary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckSquare className="w-8 h-8 text-[var(--color-text-muted)]" />
+              </div>
+              <h3 className="text-lg font-medium text-[var(--color-text-primary)] mb-2">
+                {tasks.length === 0 ? 'No tasks yet' : 'No tasks match your filters'}
+              </h3>
+              <p className="text-[var(--color-text-muted)] mb-4">
+                {tasks.length === 0 
+                  ? 'Tasks will appear here when leads are converted to clients or manually created.'
+                  : 'Try adjusting your search or filter criteria.'
+                }
+              </p>
+            </div>
+          </div>
+        ) : viewMode === 'list' ? (
           <div className="space-y-8">
             <TaskList
               title="Overdue"

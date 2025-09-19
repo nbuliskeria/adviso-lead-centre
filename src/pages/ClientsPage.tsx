@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { SearchInput } from '../components/ui/SearchInput';
 import { Select } from '../components/ui/Select';
 import ClientsTable from '../components/clients/ClientsTable';
-// import ClientDetailPanel from '../components/clients/ClientDetailPanel'; // TODO: Re-enable when clients table exists
+import ClientDetailPanel from '../components/clients/ClientDetailPanel';
 import { useToast } from '../hooks/useToast';
 
 function ClientsPage() {
@@ -17,8 +17,17 @@ function ClientsPage() {
   // TODO: Re-enable when clients table exists
   // const { data: clients = [], isLoading, error } = useClients();
   
-  // Temporary mock data to prevent errors
-  const clients: any[] = [];
+  // Mock client data with converted leads stored in localStorage
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clients: any[] = useMemo(() => {
+    try {
+      const storedClients = localStorage.getItem('convertedClients');
+      return storedClients ? JSON.parse(storedClients) : [];
+    } catch (error) {
+      console.error('Error loading converted clients:', error);
+      return [];
+    }
+  }, [location.state]); // Re-run when navigation state changes
   const isLoading = false;
   const error = null;
 
@@ -40,11 +49,20 @@ function ClientsPage() {
       window.history.replaceState({}, document.title);
     }
     
+    // Open client detail panel if navigated from conversion
     if (location.state?.newClientId) {
       setSelectedClientId(location.state.newClientId);
       setIsDetailPanelOpen(true);
     }
   }, [location.state, addToast]);
+
+  // Helper function to clear converted clients (for testing)
+  const clearConvertedClients = () => {
+    localStorage.removeItem('convertedClients');
+    addToast('All converted clients cleared', 'info');
+    // Force re-render by updating the location state dependency
+    window.location.reload();
+  };
 
   // Filter clients based on search and filters
   const filteredClients = useMemo(() => {
@@ -54,7 +72,7 @@ function ClientsPage() {
         client.account_manager?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.business_id_number?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = !statusFilter || client.client_status === statusFilter;
+      const matchesStatus = !statusFilter || client.status === statusFilter;
       const matchesPackage = !packageFilter || client.subscription_package === packageFilter;
 
       return matchesSearch && matchesStatus && matchesPackage;
@@ -63,6 +81,7 @@ function ClientsPage() {
 
   // Event handlers
   const handleSelectClient = (clientId: string) => {
+    console.log('Selected client:', clientId);
     setSelectedClientId(clientId);
     setIsDetailPanelOpen(true);
   };
@@ -81,7 +100,7 @@ function ClientsPage() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-[var(--color-destructive)] mb-4">
-            Failed to load clients: {error.message}
+            Failed to load clients: {error ? String(error) : 'Unknown error'}
           </p>
           <Button onClick={() => window.location.reload()}>
             Try Again
@@ -101,10 +120,21 @@ function ClientsPage() {
             Manage your active clients and their onboarding journey.
           </p>
         </div>
-        <Button onClick={handleAddClient} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Add Client
-        </Button>
+        <div className="flex gap-2">
+          {clients.length > 0 && (
+            <Button 
+              variant="outline" 
+              onClick={clearConvertedClients}
+              className="text-xs"
+            >
+              Clear All ({clients.length})
+            </Button>
+          )}
+          <Button onClick={handleAddClient} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Add Client
+          </Button>
+        </div>
       </div>
 
       {/* Filters and Search */}
@@ -211,12 +241,12 @@ function ClientsPage() {
         )}
       </div>
 
-      {/* Client Detail Panel - TODO: Re-enable when clients table exists */}
-      {/* <ClientDetailPanel
+      {/* Client Detail Panel */}
+      <ClientDetailPanel
         isOpen={isDetailPanelOpen}
         clientId={selectedClientId}
         onClose={handleCloseDetailPanel}
-      /> */}
+      />
     </div>
   );
 }

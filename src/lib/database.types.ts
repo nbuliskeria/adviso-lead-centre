@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -172,6 +167,90 @@ export type Database = {
           },
         ]
       }
+      clients: {
+        Row: {
+          account_manager_id: string | null
+          bank_details: Json | null
+          business_id_number: string | null
+          client_status: string | null
+          company_name: string
+          contract_end_date: string | null
+          contract_start_date: string | null
+          created_at: string | null
+          id: string
+          monthly_value: number | null
+          notes: string | null
+          onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
+          original_lead_id: string | null
+          rs_password: string | null
+          rs_username: string | null
+          subscription_package: string | null
+          tags: Json | null
+          updated_at: string | null
+          user_emails: Json | null
+        }
+        Insert: {
+          account_manager_id?: string | null
+          bank_details?: Json | null
+          business_id_number?: string | null
+          client_status?: string | null
+          company_name: string
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_value?: number | null
+          notes?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          original_lead_id?: string | null
+          rs_password?: string | null
+          rs_username?: string | null
+          subscription_package?: string | null
+          tags?: Json | null
+          updated_at?: string | null
+          user_emails?: Json | null
+        }
+        Update: {
+          account_manager_id?: string | null
+          bank_details?: Json | null
+          business_id_number?: string | null
+          client_status?: string | null
+          company_name?: string
+          contract_end_date?: string | null
+          contract_start_date?: string | null
+          created_at?: string | null
+          id?: string
+          monthly_value?: number | null
+          notes?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
+          original_lead_id?: string | null
+          rs_password?: string | null
+          rs_username?: string | null
+          subscription_package?: string | null
+          tags?: Json | null
+          updated_at?: string | null
+          user_emails?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_account_manager_id_fkey"
+            columns: ["account_manager_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_original_lead_id_fkey"
+            columns: ["original_lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           created_at: string | null
@@ -311,6 +390,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      task_template_items: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          due_days: number
+          estimated_hours: number | null
+          id: string
+          order_index: number | null
+          priority: string
+          template_id: string
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_days?: number
+          estimated_hours?: number | null
+          id?: string
+          order_index?: number | null
+          priority?: string
+          template_id: string
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_days?: number
+          estimated_hours?: number | null
+          id?: string
+          order_index?: number | null
+          priority?: string
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_profiles: {
         Row: {
@@ -507,3 +663,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

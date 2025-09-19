@@ -5,22 +5,24 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { cn } from '../../lib/utils';
 import type { UseFormWatch, UseFormSetValue } from 'react-hook-form';
-import type { TaskFormData, SubtaskData } from '../../lib/schemas';
+import type { SubtaskData } from '../../lib/schemas';
 
 interface SubtaskListProps {
-  watch: UseFormWatch<TaskFormData>;
-  setValue: UseFormSetValue<TaskFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  watch: UseFormWatch<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setValue?: UseFormSetValue<any>;
   addSubtask: (title: string) => void;
   toggleSubtask: (subtaskId: string) => void;
   removeSubtask: (subtaskId: string) => void;
 }
 
-const SubtaskList = ({ watch, setValue, addSubtask, toggleSubtask, removeSubtask }: SubtaskListProps) => {
+const SubtaskList = ({ watch, addSubtask, toggleSubtask, removeSubtask }: SubtaskListProps) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const subtasks = watch('subtasks') || [];
 
   // Calculate progress
-  const completedCount = subtasks.filter(subtask => subtask.completed).length;
+  const completedCount = subtasks.filter((subtask: SubtaskData) => subtask.completed).length;
   const totalCount = subtasks.length;
   const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 

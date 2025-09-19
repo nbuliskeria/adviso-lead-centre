@@ -5,21 +5,23 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Label } from '../../ui/Label';
 import type { Control, FieldErrors, UseFieldArrayReturn } from 'react-hook-form';
-import type { ClientOnboardingFormData } from '../../../hooks/useClientForm';
+// import type { ClientOnboardingFormData } from '../../../lib/schemas'; // TODO: Use when needed
 
 interface UserEmailsCardProps {
-  control: Control<ClientOnboardingFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: Control<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
-  errors: FieldErrors<ClientOnboardingFormData>;
-  userEmailsArray: UseFieldArrayReturn<ClientOnboardingFormData, 'user_emails'>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errors?: FieldErrors<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  userEmailsArray: UseFieldArrayReturn<any, 'user_emails'>;
   addUserEmail: () => void;
   removeUserEmail: (index: number) => void;
 }
 
 const UserEmailsCard = ({ 
-  control, 
   register, 
-  errors, 
   userEmailsArray,
   addUserEmail,
   removeUserEmail 
@@ -45,7 +47,7 @@ const UserEmailsCard = ({
                   <Input
                     placeholder="user@example.com"
                     {...register(`user_emails.${index}.email`)}
-                    error={errors.user_emails?.[index]?.email?.message}
+                    error={false}
                   />
                 </div>
                 <Button

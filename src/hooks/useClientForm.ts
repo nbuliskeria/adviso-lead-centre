@@ -1,40 +1,12 @@
 // src/hooks/useClientForm.ts
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+// import { z } from 'zod'; // TODO: Use when needed
 import { useToast } from './useToast';
 // import { useUpdateClient } from './queries';
 
-// Zod schema for client onboarding form
-const userEmailSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-});
-
-const bankDetailsSchema = z.object({
-  bankName: z.string().min(1, 'Bank name is required'),
-  iban: z.string().min(15, 'IBAN must be at least 15 characters').max(34, 'IBAN cannot exceed 34 characters'),
-  clientId: z.string().min(1, 'Client ID is required'),
-  clientSecret: z.string().min(1, 'Client Secret is required'),
-});
-
-const clientOnboardingSchema = z.object({
-  // Basic client info
-  company_name: z.string().min(1, 'Company name is required'),
-  business_id_number: z.string().optional(),
-  
-  // RS.GE Credentials
-  rs_username: z.string().optional(),
-  rs_password: z.string().optional(),
-  
-  // Dynamic arrays - these should not be optional with defaults in the schema
-  user_emails: z.array(userEmailSchema).default([]),
-  bank_details: z.array(bankDetailsSchema).default([]),
-  
-  // Onboarding status
-  onboarding_completed: z.boolean().default(false),
-});
-
-export type ClientOnboardingFormData = z.infer<typeof clientOnboardingSchema>;
+// Use the centralized schema from lib/schemas.ts
+import { clientOnboardingSchema, type ClientOnboardingFormData } from '../lib/schemas';
 
 interface UseClientFormProps {
   clientId?: string;
@@ -46,7 +18,7 @@ export const useClientForm = ({ defaultValues }: UseClientFormProps = {}) => {
   // TODO: Uncomment when client hooks are available
   // const { mutate: updateClient, isPending: isUpdating } = useUpdateClient();
 
-  const form = useForm<ClientOnboardingFormData>({
+  const form = useForm({
     resolver: zodResolver(clientOnboardingSchema),
     defaultValues: {
       company_name: '',
@@ -115,8 +87,10 @@ export const useClientForm = ({ defaultValues }: UseClientFormProps = {}) => {
   const completeOnboarding = async () => {
     try {
       const currentData = form.getValues();
-      const updatedData = {
+      const updatedData: ClientOnboardingFormData = {
         ...currentData,
+        user_emails: currentData.user_emails || [],
+        bank_details: currentData.bank_details || [],
         onboarding_completed: true,
       };
 

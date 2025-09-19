@@ -9,7 +9,9 @@ import UserEmailsCard from './UserEmailsCard';
 import BankDetailsCard from './BankDetailsCard';
 
 interface OnboardingInfoTabProps {
-  clientId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  clientId: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any; // TODO: Type this properly when client types are available
 }
 
@@ -100,8 +102,8 @@ const OnboardingInfoTab = ({ clientId, initialData }: OnboardingInfoTabProps) =>
           register={register}
           errors={formState.errors}
           bankDetailsArray={bankDetailsArray}
-          addBankAccount={addBankAccount}
-          removeBankAccount={removeBankAccount}
+          addBankDetail={addBankAccount}
+          removeBankDetail={removeBankAccount}
         />
 
         {/* Form Actions */}

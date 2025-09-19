@@ -7,11 +7,14 @@ import { CLIENT_STATUS_OPTIONS } from '../../lib/constants';
 interface ClientRow {
   id: string;
   company_name: string;
-  client_status: string;
+  status?: string; // Changed from client_status to match our mock data
   subscription_package?: string;
   monthly_value?: number;
   contract_start_date?: string;
   business_id_number?: string;
+  industry?: string; // Added directly to client
+  lead_source?: string; // Added directly to client
+  account_manager_id?: string;
   account_manager?: {
     id: string;
     display_name?: string;
@@ -19,12 +22,10 @@ interface ClientRow {
     last_name?: string;
     avatar_url?: string;
   };
-  original_lead?: {
-    industry?: string;
-    lead_source?: string;
-  };
   created_at: string;
+  converted_at?: string;
   onboarding_completed?: boolean;
+  health?: string;
 }
 
 interface ClientsTableProps {
@@ -105,14 +106,14 @@ export default function ClientsTable({ clients, onSelectClient }: ClientsTablePr
                         {client.company_name}
                       </div>
                       <div className="text-sm text-[var(--color-text-muted)]">
-                        {client.original_lead?.industry || 'Unknown Industry'}
+                        {client.industry || 'Unknown Industry'}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="py-4 px-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.client_status)}`}>
-                    {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.client_status)?.label || client.client_status}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.status || 'Active')}`}>
+                    {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.status)?.label || client.status || 'Active'}
                   </span>
                 </td>
                 <td className="py-4 px-4">
@@ -177,12 +178,12 @@ export default function ClientsTable({ clients, onSelectClient }: ClientsTablePr
                     {client.company_name}
                   </div>
                   <div className="text-sm text-[var(--color-text-muted)]">
-                    {client.original_lead?.industry || 'Unknown Industry'}
+                    {client.industry || 'Unknown Industry'}
                   </div>
                 </div>
               </div>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.client_status)}`}>
-                {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.client_status)?.label || client.client_status}
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(client.status || 'Active')}`}>
+                {CLIENT_STATUS_OPTIONS.find(opt => opt.value === client.status)?.label || client.status || 'Active'}
               </span>
             </div>
 

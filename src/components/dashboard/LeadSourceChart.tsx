@@ -41,7 +41,7 @@ const LeadSourceChart = ({ leads, className }: LeadSourceChartProps) => {
 
     leads.forEach((lead) => {
       const source = lead.lead_source || 'Website';
-      if (sourceCounts.hasOwnProperty(source)) {
+      if (Object.prototype.hasOwnProperty.call(sourceCounts, source)) {
         sourceCounts[source]++;
       }
     });
@@ -57,12 +57,14 @@ const LeadSourceChart = ({ leads, className }: LeadSourceChartProps) => {
       .filter((item) => item.value > 0);
   }, [leads]);
 
-  const handleCellClick = (data: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleClick = (data: any) => {
     navigate('/lead-database', {
       state: { sourceFilter: data.source }
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -83,14 +85,16 @@ const LeadSourceChart = ({ leads, className }: LeadSourceChartProps) => {
     return null;
   };
 
-  const CustomLegend = ({ payload }: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const CustomLegend = (props: any) => {
     return (
       <div className="flex flex-wrap justify-center gap-4 mt-4">
-        {payload?.map((entry: any, index: number) => (
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+        {props.payload?.map((entry: any, index: number) => (
           <div
             key={index}
             className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => handleCellClick(entry.payload)}
+            onClick={() => handleClick(entry.payload)}
           >
             <div
               className="w-3 h-3 rounded-full"
@@ -132,7 +136,7 @@ const LeadSourceChart = ({ leads, className }: LeadSourceChartProps) => {
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
-                    onClick={() => handleCellClick(entry)}
+                    onClick={() => handleClick(entry)}
                     className="hover:opacity-80 transition-opacity"
                   />
                 ))}

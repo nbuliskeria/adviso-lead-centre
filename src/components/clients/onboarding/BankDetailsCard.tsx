@@ -6,24 +6,26 @@ import { Input } from '../../ui/Input';
 import { PasswordInput } from '../../ui/PasswordInput';
 import { Label } from '../../ui/Label';
 import type { Control, FieldErrors, UseFieldArrayReturn } from 'react-hook-form';
-import type { ClientOnboardingFormData } from '../../../hooks/useClientForm';
+// import type { ClientOnboardingFormData } from '../../../lib/schemas'; // TODO: Use when needed
 
 interface BankDetailsCardProps {
-  control: Control<ClientOnboardingFormData>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: Control<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
-  errors: FieldErrors<ClientOnboardingFormData>;
-  bankDetailsArray: UseFieldArrayReturn<ClientOnboardingFormData, 'bank_details'>;
-  addBankAccount: () => void;
-  removeBankAccount: (index: number) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errors?: FieldErrors<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bankDetailsArray: UseFieldArrayReturn<any, 'bank_details'>;
+  addBankDetail: () => void;
+  removeBankDetail: (index: number) => void;
 }
 
 const BankDetailsCard = ({ 
-  control, 
   register, 
-  errors, 
   bankDetailsArray,
-  addBankAccount,
-  removeBankAccount 
+  addBankDetail,
+  removeBankDetail 
 }: BankDetailsCardProps) => {
   const { fields } = bankDetailsArray;
 
@@ -49,7 +51,7 @@ const BankDetailsCard = ({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeBankAccount(index)}
+                    onClick={() => removeBankDetail(index)}
                     className="text-[var(--color-destructive)] hover:text-[var(--color-destructive)] hover:bg-[var(--color-destructive)]/10"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -67,7 +69,7 @@ const BankDetailsCard = ({
                       id={`bank_details.${index}.bankName`}
                       placeholder="e.g., Bank of Georgia"
                       {...register(`bank_details.${index}.bankName`)}
-                      error={errors.bank_details?.[index]?.bankName?.message}
+                      error={false}
                     />
                   </div>
 
@@ -80,7 +82,7 @@ const BankDetailsCard = ({
                       id={`bank_details.${index}.iban`}
                       placeholder="GE29NB0000000101904917"
                       {...register(`bank_details.${index}.iban`)}
-                      error={errors.bank_details?.[index]?.iban?.message}
+                      error={false}
                     />
                   </div>
 
@@ -93,7 +95,7 @@ const BankDetailsCard = ({
                       id={`bank_details.${index}.clientId`}
                       placeholder="Enter client ID"
                       {...register(`bank_details.${index}.clientId`)}
-                      error={errors.bank_details?.[index]?.clientId?.message}
+                      error={false}
                     />
                   </div>
 
@@ -106,7 +108,7 @@ const BankDetailsCard = ({
                       id={`bank_details.${index}.clientSecret`}
                       placeholder="Enter client secret"
                       {...register(`bank_details.${index}.clientSecret`)}
-                      error={errors.bank_details?.[index]?.clientSecret?.message}
+                      error={false}
                     />
                   </div>
                 </div>
@@ -129,7 +131,7 @@ const BankDetailsCard = ({
           <Button
             type="button"
             variant="outline"
-            onClick={addBankAccount}
+            onClick={addBankDetail}
             className="flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />

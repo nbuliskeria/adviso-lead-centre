@@ -3,8 +3,8 @@ import { forwardRef } from 'react';
 import type { InputHTMLAttributes } from 'react';
 import { cn } from '../../lib/utils';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  error?: boolean;
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'error'> {
+  error?: boolean | string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -29,7 +29,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           'dark:backdrop-blur-sm',
           
           // Error state
-          error && 'border-[var(--color-destructive)] focus-visible:ring-[var(--color-destructive)]',
+          !!error && 'border-[var(--color-destructive)] focus-visible:ring-[var(--color-destructive)]',
           
           // Hover effects
           'hover:border-[var(--color-border-strong)] hover:shadow-sm',

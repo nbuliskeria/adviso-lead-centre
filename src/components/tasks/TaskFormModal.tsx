@@ -43,7 +43,7 @@ const TaskFormModal = ({ isOpen, onClose, leadId, clientId }: TaskFormModalProps
             id="title"
             {...register('title')}
             placeholder="Enter task title..."
-            error={errors.title?.message}
+            error={!!errors.title?.message}
           />
         </div>
 
@@ -72,7 +72,7 @@ const TaskFormModal = ({ isOpen, onClose, leadId, clientId }: TaskFormModalProps
               {...register('status')}
             >
               {TASK_STATUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}
@@ -88,7 +88,7 @@ const TaskFormModal = ({ isOpen, onClose, leadId, clientId }: TaskFormModalProps
               {...register('priority')}
             >
               {TASK_PRIORITY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}
@@ -108,7 +108,7 @@ const TaskFormModal = ({ isOpen, onClose, leadId, clientId }: TaskFormModalProps
             >
               <option value="">Select category...</option>
               {TASK_CATEGORY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value || ''}>
                   {option.label}
                 </option>
               ))}
